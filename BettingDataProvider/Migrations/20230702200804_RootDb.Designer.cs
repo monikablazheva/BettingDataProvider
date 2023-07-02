@@ -12,7 +12,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace BettingDataProvider.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20230701133637_RootDb")]
+    [Migration("20230702200804_RootDb")]
     partial class RootDb
     {
         /// <inheritdoc />
@@ -42,7 +42,7 @@ namespace BettingDataProvider.Migrations
                     b.Property<bool>("IsLive")
                         .HasColumnType("bit");
 
-                    b.Property<int?>("MatchId")
+                    b.Property<int>("MatchId")
                         .HasColumnType("int");
 
                     b.Property<string>("Name")
@@ -77,7 +77,7 @@ namespace BettingDataProvider.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<int?>("SportId")
+                    b.Property<int>("SportId")
                         .HasColumnType("int");
 
                     b.HasKey("Id");
@@ -95,7 +95,7 @@ namespace BettingDataProvider.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
-                    b.Property<int?>("EventId")
+                    b.Property<int>("EventId")
                         .HasColumnType("int");
 
                     b.Property<bool?>("IsActive")
@@ -129,8 +129,11 @@ namespace BettingDataProvider.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
-                    b.Property<int?>("BetId")
+                    b.Property<int>("BetId")
                         .HasColumnType("int");
+
+                    b.Property<bool?>("IsActive")
+                        .HasColumnType("bit");
 
                     b.Property<string>("Name")
                         .IsRequired()
@@ -139,11 +142,11 @@ namespace BettingDataProvider.Migrations
                     b.Property<int>("OddId")
                         .HasColumnType("int");
 
-                    b.Property<decimal?>("SpecialBetValue")
-                        .HasColumnType("decimal(5, 2)");
+                    b.Property<double?>("SpecialBetValue")
+                        .HasColumnType("float");
 
-                    b.Property<decimal>("Value")
-                        .HasColumnType("decimal(5, 2)");
+                    b.Property<double>("Value")
+                        .HasColumnType("float");
 
                     b.HasKey("Id");
 
@@ -174,30 +177,46 @@ namespace BettingDataProvider.Migrations
 
             modelBuilder.Entity("BettingDataProvider.Models.Bet", b =>
                 {
-                    b.HasOne("BettingDataProvider.Models.Match", null)
+                    b.HasOne("BettingDataProvider.Models.Match", "Match")
                         .WithMany("Bets")
-                        .HasForeignKey("MatchId");
+                        .HasForeignKey("MatchId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Match");
                 });
 
             modelBuilder.Entity("BettingDataProvider.Models.Event", b =>
                 {
-                    b.HasOne("BettingDataProvider.Models.Sport", null)
+                    b.HasOne("BettingDataProvider.Models.Sport", "Sport")
                         .WithMany("Events")
-                        .HasForeignKey("SportId");
+                        .HasForeignKey("SportId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Sport");
                 });
 
             modelBuilder.Entity("BettingDataProvider.Models.Match", b =>
                 {
-                    b.HasOne("BettingDataProvider.Models.Event", null)
+                    b.HasOne("BettingDataProvider.Models.Event", "Event")
                         .WithMany("Matches")
-                        .HasForeignKey("EventId");
+                        .HasForeignKey("EventId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Event");
                 });
 
             modelBuilder.Entity("BettingDataProvider.Models.Odd", b =>
                 {
-                    b.HasOne("BettingDataProvider.Models.Bet", null)
+                    b.HasOne("BettingDataProvider.Models.Bet", "Bet")
                         .WithMany("Odds")
-                        .HasForeignKey("BetId");
+                        .HasForeignKey("BetId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Bet");
                 });
 
             modelBuilder.Entity("BettingDataProvider.Models.Bet", b =>

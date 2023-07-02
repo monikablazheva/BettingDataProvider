@@ -4,6 +4,8 @@ using Microsoft.AspNetCore.Mvc;
 using System.Diagnostics;
 using System.Xml;
 using Microsoft.EntityFrameworkCore.ChangeTracking;
+using Microsoft.EntityFrameworkCore;
+using System.Globalization;
 
 namespace BettingDataProvider.Controllers
 {
@@ -35,6 +37,7 @@ namespace BettingDataProvider.Controllers
         }
 
         [HttpPost]
+        [ValidateAntiForgeryToken]
         public async Task<IActionResult> PullData()
         {
             try
@@ -62,13 +65,17 @@ namespace BettingDataProvider.Controllers
 
                         foreach (XmlNode sportNode in sportNodes)
                         {
+                            int sportId = int.Parse(sportNode.Attributes["ID"].Value);
                             Sport currentSport = new Sport
                             {
                                 Name = sportNode.Attributes["Name"].Value,
                                 SportId = int.Parse(sportNode.Attributes["ID"].Value)
                             };
-                            _context.Sports.AddIfNotExists(currentSport); //add the sport to the database if not already in
-                            await _context.SaveChangesAsync();
+                            
+                            if (!_context.Sports.Any(s => s.SportId == sportId))
+                            {
+                                _context.Sports.Add(currentSport); //add the sport to the database if not already in
+                            }
 
                             XmlNodeList eventNodes = sportNode.SelectNodes("Event"); //events
                             if (eventNodes == null)
@@ -76,6 +83,7 @@ namespace BettingDataProvider.Controllers
 
                             foreach (XmlNode eventNode in eventNodes)
                             {
+                                int eventId = int.Parse(eventNode.Attributes["ID"].Value);
                                 Event currentEvent = new Event()
                                 {
                                     Name = eventNode.Attributes["Name"].Value,
@@ -84,23 +92,146 @@ namespace BettingDataProvider.Controllers
                                     CategoryID = int.Parse(eventNode.Attributes["CategoryID"].Value),
                                     Sport = currentSport
                                 };
-                                _context.Events.AddIfNotExists(currentEvent); //add the event to the database if not already in
 
-                                if (!currentSport.Events.Contains(currentEvent)) //add the event to its sport's list if not already in
+                                if (!_context.Events.Any(e => e.EventId == eventId))
                                 {
-                                    currentSport.Events.Add(currentEvent);
-                                    _context.Sports.Update(currentSport);
+                                    _context.Events.Add(currentEvent); //add the event to the database if not already in
                                 }
-                                await _context.SaveChangesAsync();
 
                                 XmlNodeList matchNodes = eventNode.SelectNodes("Match"); //matches
                                 if (matchNodes == null)
                                     return NotFound("Match nodes are null.");
 
-                                /*foreach(XmlNode matchNode in matchNodes)
+                                foreach (XmlNode matchNode in matchNodes)
                                 {
-                                    if
-                                }*/
+                                    string matchName = matchNode.Attributes["Name"].Value;
+                                    int matchID = int.Parse(matchNode.Attributes["ID"].Value);
+                                    DateTime matchStartDate = DateTime.Parse(matchNode.Attributes["StartDate"].Value);
+
+                                    var matchType = matchNode.Attributes["MatchType"].Value;
+                                    Models.MatchType matchMatchType = 0;
+                                    if (matchType.ToLower() == Models.MatchType.Prematch.ToString().ToLower())
+                                    {
+                                        matchMatchType = Models.MatchType.Prematch;
+                                    }
+                                    else if (matchType.ToLower() == Models.MatchType.Live.ToString().ToLower())
+                                    {
+                                        matchMatchType = Models.MatchType.Live;
+                                    }
+                                    else if (matchType.ToLower() == Models.MatchType.Outright.ToString().ToLower())
+                                    {
+                                        matchMatchType = Models.MatchType.Outright;
+                                    }
+
+                                    Match currentMatch = new Match()
+                                    {
+                                        Name = matchName,
+                                        MatchId = matchID,
+                                        StartDate = matchStartDate,
+                                        Type = matchMatchType,
+                                        IsActive = true,
+                                        Event = currentEvent
+                                    };
+
+                                    if (_context.Matches.Any(m => m.MatchId == matchID))
+                                    {
+                                        Match matchFromDb = await _context.Matches.Include(m => m.Bets).ThenInclude(b => b.Odds).FirstOrDefaultAsync(m => m.MatchId == matchID);
+
+                                        if (matchFromDb == null)
+                                            return NotFound("Match from db is null.");
+
+                                        if (matchFromDb.StartDate != matchStartDate)
+                                        {
+                                            matchFromDb.StartDate = matchStartDate;
+                                            _context.Matches.Update(matchFromDb);
+                                        }
+                                        if (matchFromDb.Type != matchMatchType)
+                                        {
+                                            matchFromDb.Type = matchMatchType;
+                                            _context.Matches.Update(matchFromDb);
+                                        }
+
+                                    }
+                                    else
+                                    { 
+                                        _context.Matches.Add(currentMatch); //add the match to the database 
+                                        
+                                    }
+
+                                    XmlNodeList betNodes = matchNode.SelectNodes("Bet"); //bets
+                                    if (betNodes == null)
+                                        return NotFound("Bet nodes are null.");
+
+                                    foreach(XmlNode betNode in betNodes)
+                                    {
+                                        int betId = int.Parse(betNode.Attributes["ID"].Value);
+                                        Bet currentBet = new Bet()
+                                        {
+                                            Name = betNode.Attributes["Name"].Value,
+                                            BetId = int.Parse(betNode.Attributes["ID"].Value),
+                                            IsLive = bool.Parse(betNode.Attributes["IsLive"].Value),
+                                            Match = currentMatch,
+                                            IsActive = true
+                                        };
+
+                                        if (!_context.Bets.Any(b => b.BetId == betId))
+                                        {
+                                            _context.Bets.Add(currentBet); //add the bet to the database if not already in
+                                        }
+
+                                        XmlNodeList oddNodes = betNode.SelectNodes("Odd"); //bets
+                                        if (oddNodes == null)
+                                            return NotFound("Odd nodes are null.");
+
+                                        foreach (XmlNode oddNode in oddNodes)
+                                        {
+                                            int oddId = int.Parse(oddNode.Attributes["ID"].Value);
+                                            double oddValue = double.Parse(oddNode.Attributes["Value"].Value, CultureInfo.InvariantCulture);
+                                            
+                                            if (_context.Odds.Any(o => o.OddId == oddId))
+                                            {
+                                                Odd oddFromDb = await _context.Odds.FirstOrDefaultAsync(o => o.OddId == oddId);
+
+                                                if (oddFromDb == null)
+                                                    return NotFound("Odd from db is null.");
+
+                                                if (oddFromDb.Value != oddValue)
+                                                {
+                                                    oddFromDb.Value = oddValue;
+                                                    _context.Odds.Update(oddFromDb);
+                                                }
+                                            }
+                                            else
+                                            {
+                                                if(oddNode.Attributes["SpecialBetValue"] != null)
+                                                {
+                                                    Odd currentOdd = new Odd()
+                                                    {
+                                                        Name = oddNode.Attributes["Name"].Value,
+                                                        OddId = oddId,
+                                                        Value = oddValue,
+                                                        SpecialBetValue = double.Parse(oddNode.Attributes["SpecialBetValue"].Value, CultureInfo.InvariantCulture),
+                                                        IsActive = true,
+                                                        Bet = currentBet
+                                                    };
+                                                    _context.Odds.Add(currentOdd); //add the odd to the database 
+                                                }
+                                                else
+                                                {
+                                                    Odd currentOdd = new Odd()
+                                                    {
+                                                        Name = oddNode.Attributes["Name"].Value,
+                                                        OddId = oddId,
+                                                        Value = oddValue,
+                                                        IsActive = true,
+                                                        Bet = currentBet
+                                                    };
+                                                    _context.Odds.Add(currentOdd); //add the odd to the database 
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
                             }
                         }
                         await _context.SaveChangesAsync();
@@ -110,7 +241,7 @@ namespace BettingDataProvider.Controllers
             }
             catch (Exception ex)
             {
-                return NotFound();
+                return NotFound(ex.ToString());
             }
         }
     }

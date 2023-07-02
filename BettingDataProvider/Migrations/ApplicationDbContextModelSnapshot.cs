@@ -50,7 +50,7 @@ namespace BettingDataProvider.Migrations
 
                     b.HasIndex("MatchId");
 
-                    b.ToTable("Bets", (string)null);
+                    b.ToTable("Bets");
                 });
 
             modelBuilder.Entity("BettingDataProvider.Models.Event", b =>
@@ -81,7 +81,7 @@ namespace BettingDataProvider.Migrations
 
                     b.HasIndex("SportId");
 
-                    b.ToTable("Events", (string)null);
+                    b.ToTable("Events");
                 });
 
             modelBuilder.Entity("BettingDataProvider.Models.Match", b =>
@@ -115,7 +115,7 @@ namespace BettingDataProvider.Migrations
 
                     b.HasIndex("EventId");
 
-                    b.ToTable("Matches", (string)null);
+                    b.ToTable("Matches");
                 });
 
             modelBuilder.Entity("BettingDataProvider.Models.Odd", b =>
@@ -129,6 +129,9 @@ namespace BettingDataProvider.Migrations
                     b.Property<int>("BetId")
                         .HasColumnType("int");
 
+                    b.Property<bool?>("IsActive")
+                        .HasColumnType("bit");
+
                     b.Property<string>("Name")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
@@ -136,17 +139,17 @@ namespace BettingDataProvider.Migrations
                     b.Property<int>("OddId")
                         .HasColumnType("int");
 
-                    b.Property<decimal?>("SpecialBetValue")
-                        .HasColumnType("decimal(5, 2)");
+                    b.Property<double?>("SpecialBetValue")
+                        .HasColumnType("float");
 
-                    b.Property<decimal>("Value")
-                        .HasColumnType("decimal(5, 2)");
+                    b.Property<double>("Value")
+                        .HasColumnType("float");
 
                     b.HasKey("Id");
 
                     b.HasIndex("BetId");
 
-                    b.ToTable("Odds", (string)null);
+                    b.ToTable("Odds");
                 });
 
             modelBuilder.Entity("BettingDataProvider.Models.Sport", b =>
@@ -166,7 +169,7 @@ namespace BettingDataProvider.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Sports", (string)null);
+                    b.ToTable("Sports");
                 });
 
             modelBuilder.Entity("BettingDataProvider.Models.Bet", b =>
