@@ -7,9 +7,10 @@ namespace BettingDataProvider.Models
     public class Odd
     {
         [Key]
-        public int Id { get; set; }
+        public long Id { get; set; }
 
-        public int OddId { get; set; }
+        [Required]
+        public string OddId { get; set; }
 
         [Required]
         public string Name { get; set; }

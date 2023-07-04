@@ -15,9 +15,9 @@ namespace BettingDataProvider.Migrations
                 name: "Sports",
                 columns: table => new
                 {
-                    Id = table.Column<int>(type: "int", nullable: false)
+                    Id = table.Column<long>(type: "bigint", nullable: false)
                         .Annotation("SqlServer:Identity", "1, 1"),
-                    SportId = table.Column<int>(type: "int", nullable: false),
+                    SportId = table.Column<string>(type: "nvarchar(450)", nullable: false),
                     Name = table.Column<string>(type: "nvarchar(max)", nullable: false)
                 },
                 constraints: table =>
@@ -29,13 +29,13 @@ namespace BettingDataProvider.Migrations
                 name: "Events",
                 columns: table => new
                 {
-                    Id = table.Column<int>(type: "int", nullable: false)
+                    Id = table.Column<long>(type: "bigint", nullable: false)
                         .Annotation("SqlServer:Identity", "1, 1"),
-                    EventId = table.Column<int>(type: "int", nullable: false),
+                    EventId = table.Column<string>(type: "nvarchar(450)", nullable: false),
                     Name = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     IsLive = table.Column<bool>(type: "bit", nullable: false),
                     CategoryID = table.Column<int>(type: "int", nullable: false),
-                    SportId = table.Column<int>(type: "int", nullable: false)
+                    SportId = table.Column<long>(type: "bigint", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -52,14 +52,14 @@ namespace BettingDataProvider.Migrations
                 name: "Matches",
                 columns: table => new
                 {
-                    Id = table.Column<int>(type: "int", nullable: false)
+                    Id = table.Column<long>(type: "bigint", nullable: false)
                         .Annotation("SqlServer:Identity", "1, 1"),
-                    MatchId = table.Column<int>(type: "int", nullable: false),
+                    MatchId = table.Column<string>(type: "nvarchar(450)", nullable: false),
                     Name = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     StartDate = table.Column<DateTime>(type: "datetime2", nullable: false),
                     IsActive = table.Column<bool>(type: "bit", nullable: true),
                     Type = table.Column<int>(type: "int", nullable: false),
-                    EventId = table.Column<int>(type: "int", nullable: false)
+                    EventId = table.Column<long>(type: "bigint", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -76,13 +76,13 @@ namespace BettingDataProvider.Migrations
                 name: "Bets",
                 columns: table => new
                 {
-                    Id = table.Column<int>(type: "int", nullable: false)
+                    Id = table.Column<long>(type: "bigint", nullable: false)
                         .Annotation("SqlServer:Identity", "1, 1"),
-                    BetId = table.Column<int>(type: "int", nullable: false),
+                    BetId = table.Column<string>(type: "nvarchar(450)", nullable: false),
                     Name = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     IsLive = table.Column<bool>(type: "bit", nullable: false),
                     IsActive = table.Column<bool>(type: "bit", nullable: true),
-                    MatchId = table.Column<int>(type: "int", nullable: false)
+                    MatchId = table.Column<long>(type: "bigint", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -99,14 +99,14 @@ namespace BettingDataProvider.Migrations
                 name: "Odds",
                 columns: table => new
                 {
-                    Id = table.Column<int>(type: "int", nullable: false)
+                    Id = table.Column<long>(type: "bigint", nullable: false)
                         .Annotation("SqlServer:Identity", "1, 1"),
-                    OddId = table.Column<int>(type: "int", nullable: false),
+                    OddId = table.Column<string>(type: "nvarchar(450)", nullable: false),
                     Name = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     Value = table.Column<double>(type: "float", nullable: false),
                     SpecialBetValue = table.Column<double>(type: "float", nullable: true),
                     IsActive = table.Column<bool>(type: "bit", nullable: true),
-                    BetId = table.Column<int>(type: "int", nullable: false)
+                    BetId = table.Column<long>(type: "bigint", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -120,9 +120,21 @@ namespace BettingDataProvider.Migrations
                 });
 
             migrationBuilder.CreateIndex(
+                name: "IX_Bets_BetId",
+                table: "Bets",
+                column: "BetId",
+                unique: true);
+
+            migrationBuilder.CreateIndex(
                 name: "IX_Bets_MatchId",
                 table: "Bets",
                 column: "MatchId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Events_EventId",
+                table: "Events",
+                column: "EventId",
+                unique: true);
 
             migrationBuilder.CreateIndex(
                 name: "IX_Events_SportId",
@@ -135,9 +147,27 @@ namespace BettingDataProvider.Migrations
                 column: "EventId");
 
             migrationBuilder.CreateIndex(
+                name: "IX_Matches_MatchId",
+                table: "Matches",
+                column: "MatchId",
+                unique: true);
+
+            migrationBuilder.CreateIndex(
                 name: "IX_Odds_BetId",
                 table: "Odds",
                 column: "BetId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Odds_OddId",
+                table: "Odds",
+                column: "OddId",
+                unique: true);
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Sports_SportId",
+                table: "Sports",
+                column: "SportId",
+                unique: true);
         }
 
         /// <inheritdoc />

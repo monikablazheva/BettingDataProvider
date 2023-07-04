@@ -9,7 +9,28 @@ namespace BettingDataProvider.Data
             : base(options)
         {
         }
+        protected override void OnModelCreating(ModelBuilder modelBuilder)
+        {
+            modelBuilder.Entity<Sport>()
+                .HasIndex(e => e.SportId)
+                .IsUnique();
 
+            modelBuilder.Entity<Event>()
+               .HasIndex(e => e.EventId)
+               .IsUnique();
+
+            modelBuilder.Entity<Match>()
+               .HasIndex(e => e.MatchId)
+               .IsUnique();
+
+            modelBuilder.Entity<Bet>()
+               .HasIndex(e => e.BetId)
+               .IsUnique();
+
+            modelBuilder.Entity<Odd>()
+               .HasIndex(e => e.OddId)
+               .IsUnique();
+        }
         public DbSet<Sport> Sports { get; set; }
 
         public DbSet<Event> Events { get; set; }

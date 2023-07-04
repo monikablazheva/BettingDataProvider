@@ -5,9 +5,10 @@ namespace BettingDataProvider.Models
     public class Sport
     {
         [Key]
-        public int Id { get; set; }
+        public long Id { get; set; }
 
-        public int SportId { get; set; }
+        [Required]
+        public string SportId { get; set; }
 
         [Required]
         public string Name { get; set; }

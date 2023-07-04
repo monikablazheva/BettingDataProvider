@@ -1,0 +1,44 @@
+﻿@model IEnumerable<BettingDataProvider.Models.ViewModels.MatchViewModel>
+
+@{
+    ViewData["Title"] = "Index";
+}
+<link href="https://cdnjs.cloudflare.com/ajax/libs/ionicons/2.0.1/css/ionicons.css" rel="stylesheet" type="text/css" />
+<link href="/css/tree.css" rel="stylesheet" type="text/css" />
+
+<h1>Matches in the next 24 hours</h1>
+
+<nav class="tree-nav">
+
+    @foreach (var matchVM in Model)
+    {
+        <details class="tree-nav__item is-expandable">
+        <summary class="tree-nav__item-title">@matchVM.Match.Name | @matchVM.Match.StartDate</summary>
+
+            @foreach (var bet in matchVM.PreviewMarkets)
+            {
+                <details class="tree-nav__item is-expandable">
+                <summary class="tree-nav__item-title">@bet.Name</summary>
+
+                    @foreach (var odd in matchVM.Odds)
+                    {
+                        <details class="tree-nav__item is-expandable">
+
+                            @if(odd.SpecialBetValue == null)
+                            {
+                                <summary class="tree-nav__item-title">@odd.Name -> @odd.Value</summary>
+                            }
+                            else
+                            {
+                                <summary class="tree-nav__item-title">@odd.Name -> @odd.Value -> @odd.SpecialBetValue</summary>
+                            }
+
+                        </details>
+                    }
+
+                </details>
+            }
+
+        </details>
+    }
+</nav>

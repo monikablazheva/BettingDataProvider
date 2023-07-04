@@ -1,13 +1,15 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿using Microsoft.EntityFrameworkCore;
+using System.ComponentModel.DataAnnotations;
 
 namespace BettingDataProvider.Models
 {
     public class Bet
     {
         [Key]
-        public int Id { get; set; }
+        public long Id { get; set; }
 
-        public int BetId { get; set; }
+        [Required]
+        public string BetId { get; set; }
 
         [Required]
         public string Name { get; set; }

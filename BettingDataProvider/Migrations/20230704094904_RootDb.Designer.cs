@@ -12,7 +12,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace BettingDataProvider.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20230702200804_RootDb")]
+    [Migration("20230704094904_RootDb")]
     partial class RootDb
     {
         /// <inheritdoc />
@@ -27,14 +27,15 @@ namespace BettingDataProvider.Migrations
 
             modelBuilder.Entity("BettingDataProvider.Models.Bet", b =>
                 {
-                    b.Property<int>("Id")
+                    b.Property<long>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
+                        .HasColumnType("bigint");
 
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<long>("Id"));
 
-                    b.Property<int>("BetId")
-                        .HasColumnType("int");
+                    b.Property<string>("BetId")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(450)");
 
                     b.Property<bool?>("IsActive")
                         .HasColumnType("bit");
@@ -42,14 +43,17 @@ namespace BettingDataProvider.Migrations
                     b.Property<bool>("IsLive")
                         .HasColumnType("bit");
 
-                    b.Property<int>("MatchId")
-                        .HasColumnType("int");
+                    b.Property<long>("MatchId")
+                        .HasColumnType("bigint");
 
                     b.Property<string>("Name")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("BetId")
+                        .IsUnique();
 
                     b.HasIndex("MatchId");
 
@@ -58,17 +62,18 @@ namespace BettingDataProvider.Migrations
 
             modelBuilder.Entity("BettingDataProvider.Models.Event", b =>
                 {
-                    b.Property<int>("Id")
+                    b.Property<long>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
+                        .HasColumnType("bigint");
 
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<long>("Id"));
 
                     b.Property<int>("CategoryID")
                         .HasColumnType("int");
 
-                    b.Property<int>("EventId")
-                        .HasColumnType("int");
+                    b.Property<string>("EventId")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(450)");
 
                     b.Property<bool>("IsLive")
                         .HasColumnType("bit");
@@ -77,10 +82,13 @@ namespace BettingDataProvider.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<int>("SportId")
-                        .HasColumnType("int");
+                    b.Property<long>("SportId")
+                        .HasColumnType("bigint");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("EventId")
+                        .IsUnique();
 
                     b.HasIndex("SportId");
 
@@ -89,20 +97,21 @@ namespace BettingDataProvider.Migrations
 
             modelBuilder.Entity("BettingDataProvider.Models.Match", b =>
                 {
-                    b.Property<int>("Id")
+                    b.Property<long>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
+                        .HasColumnType("bigint");
 
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<long>("Id"));
 
-                    b.Property<int>("EventId")
-                        .HasColumnType("int");
+                    b.Property<long>("EventId")
+                        .HasColumnType("bigint");
 
                     b.Property<bool?>("IsActive")
                         .HasColumnType("bit");
 
-                    b.Property<int>("MatchId")
-                        .HasColumnType("int");
+                    b.Property<string>("MatchId")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(450)");
 
                     b.Property<string>("Name")
                         .IsRequired()
@@ -118,19 +127,22 @@ namespace BettingDataProvider.Migrations
 
                     b.HasIndex("EventId");
 
+                    b.HasIndex("MatchId")
+                        .IsUnique();
+
                     b.ToTable("Matches");
                 });
 
             modelBuilder.Entity("BettingDataProvider.Models.Odd", b =>
                 {
-                    b.Property<int>("Id")
+                    b.Property<long>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
+                        .HasColumnType("bigint");
 
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<long>("Id"));
 
-                    b.Property<int>("BetId")
-                        .HasColumnType("int");
+                    b.Property<long>("BetId")
+                        .HasColumnType("bigint");
 
                     b.Property<bool?>("IsActive")
                         .HasColumnType("bit");
@@ -139,8 +151,9 @@ namespace BettingDataProvider.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<int>("OddId")
-                        .HasColumnType("int");
+                    b.Property<string>("OddId")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(450)");
 
                     b.Property<double?>("SpecialBetValue")
                         .HasColumnType("float");
@@ -152,25 +165,32 @@ namespace BettingDataProvider.Migrations
 
                     b.HasIndex("BetId");
 
+                    b.HasIndex("OddId")
+                        .IsUnique();
+
                     b.ToTable("Odds");
                 });
 
             modelBuilder.Entity("BettingDataProvider.Models.Sport", b =>
                 {
-                    b.Property<int>("Id")
+                    b.Property<long>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
+                        .HasColumnType("bigint");
 
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<long>("Id"));
 
                     b.Property<string>("Name")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<int>("SportId")
-                        .HasColumnType("int");
+                    b.Property<string>("SportId")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(450)");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("SportId")
+                        .IsUnique();
 
                     b.ToTable("Sports");
                 });
