@@ -4,6 +4,7 @@
     ViewData["Title"] = "Index";
 }
 <link href="https://cdnjs.cloudflare.com/ajax/libs/ionicons/2.0.1/css/ionicons.css" rel="stylesheet" type="text/css" />
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
 <link href="/css/tree.css" rel="stylesheet" type="text/css" />
 
 <h1>Matches in the next 24 hours</h1>
@@ -13,31 +14,31 @@
     @foreach (var matchVM in Model)
     {
         <details class="tree-nav__item is-expandable">
-            <summary class="tree-nav__item-title">@matchVM.Match.Name | @matchVM.Match.StartDate | <a asp-action="Details" asp-route-id="@matchVM.Match.Id">Details</a></summary>
+            <summary id="match-@matchVM.Match.Id" class="tree-nav__item-title">@matchVM.Match.Name @matchVM.Match.StartDate | <a asp-action="Details" asp-route-id="@matchVM.Match.Id">Details</a> | <a href="#" class="RemoveMatch" data-id="@matchVM.Match.Id"><i class="fa fa-remove"></i></a></summary>
 
             @foreach (var bet in matchVM.PreviewMarkets)
             {
                 <details class="tree-nav__item is-expandable">
-                <summary class="tree-nav__item-title">@bet.Name</summary>
+                    <summary id="bet-@bet.Id" class="tree-nav__item-title">@bet.Name | <a href="#" class="RemoveBet" data-id="@bet.Id"><i class="fa fa-remove"></i></a></summary>
 
-                    @foreach (var odds in matchVM.MarketsOdds.Where(m=>m.Key == bet.Id))
+                    @foreach (var odds in matchVM.MarketsOdds.Where(m => m.Key == bet.Id))
                     {
-                        foreach(var odd in odds.Value)
+                        foreach (var odd in odds.Value)
                         {
                             <details class="tree-nav__item is-expandable">
 
                                 @if (odd.SpecialBetValue == null)
                                 {
-                                    <summary class="tree-nav__item-title">@odd.Name -> @odd.Value</summary>
+                                    <summary id="odd-@odd.Id" class="tree-nav__item-title">@odd.Name -> @odd.Value | <a href="#" class="RemoveOdd" data-id="@odd.Id"><i class="fa fa-remove"></i></a></summary>
                                 }
                                 else
                                 {
-                                    <summary class="tree-nav__item-title">@odd.Name -> @odd.Value -> @odd.SpecialBetValue</summary>
+                                    <summary id="odd-@odd.Id" class="tree-nav__item-title">@odd.Name -> @odd.Value -> @odd.SpecialBetValue | <a href="#" class="RemoveOdd" data-id="@odd.Id"><i class="fa fa-remove"></i></a></summary>
                                 }
 
                             </details>
                         }
-                        
+
                     }
 
                 </details>
@@ -46,3 +47,48 @@
         </details>
     }
 </nav>
+
+@section Scripts{
+    <script type="text/javascript">
+        $(function () {
+            $(".RemoveMatch").click(function () {
+                var recordToHide = $(this).attr("data-id");
+                if (recordToHide != '') {
+                    console.log(JSON.parse(JSON.stringify(recordToHide)))
+                    $.post("@Url.Action("HideMatch","Matches")", { "matchId": recordToHide },
+                        function (data) {
+                            console.log("match hide");
+                        }
+                    );
+                }
+            });
+        });
+        $(function () {
+            $(".RemoveBet").click(function () {
+                var recordToHide = $(this).attr("data-id");
+                if (recordToHide != '') {
+                    console.log(JSON.parse(JSON.stringify(recordToHide)))
+                    $.post("@Url.Action("HideBet","Matches")", { "betId": recordToHide },
+                        function (data) {
+                            console.log("bet hide");
+                        }
+                    );
+                }
+            });
+        });
+        $(function () {
+            $(".RemoveOdd").click(function () {
+                var recordToHide = $(this).attr("data-id");
+                if (recordToHide != '') {
+                    console.log(JSON.parse(JSON.stringify(recordToHide)))
+                    $.post("@Url.Action("HideOdd","Matches")", { "oddId": recordToHide },
+                        function (data) {
+                            console.log("odd hide");
+                        }
+                    );
+                }
+            });
+        });
+        
+    </script>
+}

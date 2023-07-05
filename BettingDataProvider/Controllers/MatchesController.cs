@@ -8,6 +8,7 @@ using Microsoft.EntityFrameworkCore;
 using BettingDataProvider.Data;
 using BettingDataProvider.Models;
 using BettingDataProvider.Models.ViewModels;
+using BettingDataProvider.Services;
 
 namespace BettingDataProvider.Controllers
 {
@@ -29,7 +30,7 @@ namespace BettingDataProvider.Controllers
             }
 
 
-            var matchesFromDb = await _context.Matches.Include(m => m.Bets).ThenInclude(b => b.Odds).ToListAsync();
+            var matchesFromDb = await _context.Matches.Include(m => m.Bets).ThenInclude(b => b.Odds).AsSplitQuery().ToListAsync();
 
             DateTime now = DateTime.Now;
             DateTime next24Hours = now.AddHours(24);
@@ -76,7 +77,7 @@ namespace BettingDataProvider.Controllers
                 return NotFound();
             }
 
-            var match = await _context.Matches.Include(m => m.Bets).ThenInclude(b => b.Odds)
+            var match = await _context.Matches.Include(m => m.Bets).ThenInclude(b => b.Odds).AsSplitQuery()
                 .FirstOrDefaultAsync(m => m.Id == id);
             if (match == null)
             {
@@ -90,6 +91,42 @@ namespace BettingDataProvider.Controllers
             };
 
             return View(matchDetailsViewModel);
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> HideMatch(long matchId)
+        {
+            var match = await _context.Matches.FindAsync(matchId);
+            if (match != null)
+            {
+                QueueManager.AddItem($"Match {match.Name} was hidden by an user");
+            }
+
+            return Json(new { HideId = matchId, Entity = "match" });
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> HideBet(long betId)
+        {
+            var bet = await _context.Bets.FindAsync(betId);
+            if (bet != null)
+            {
+                QueueManager.AddItem($"Bet {bet.Name} hidden by an user");
+            }
+
+            return Json(new { HideId = betId, Entity = "bet" });
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> HideOdd(long oddId)
+        {
+            var odd = await _context.Odds.FindAsync(oddId);
+            if (odd != null)
+            {
+                QueueManager.AddItem($"Odd {odd.Name}was hidden by an user");
+            }
+
+            return Json(new { HideId = oddId, Entity = "odd" });
         }
     }
 }

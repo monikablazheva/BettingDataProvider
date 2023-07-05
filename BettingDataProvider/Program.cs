@@ -39,6 +39,6 @@ app.MapControllerRoute(
 app.UseHangfireDashboard();
 app.UseHangfireServer();
 
-RecurringJob.AddOrUpdate<HomeController>(x => x.PullData(), Cron.MinuteInterval(1));
+RecurringJob.AddOrUpdate<XmlDataController>(x => x.PullData(), Cron.MinuteInterval(1));
 
 app.Run();
