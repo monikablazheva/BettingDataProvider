@@ -40,8 +40,11 @@ namespace BettingDataProvider.Controllers
             
             foreach (Match match in matchesInNext24Hours)
             {
-                List<Odd> odds = new List<Odd>();
+                List<Odd> odds = new List<Odd>();    
+                Dictionary<long, List<Odd>> marketsOdds = new Dictionary<long, List<Odd>>();
+                
                 var previewMarkets = match.Bets.Where(b => b.IsActive==true && b.Name == "Match Winner" || b.Name == "Map Advantage" || b.Name == "Total Maps Played").ToList();
+                
                 foreach(var bet in previewMarkets)
                 {
                     odds = bet.Odds.Where(o => o.IsActive == true).ToList(); 
@@ -52,12 +55,13 @@ namespace BettingDataProvider.Controllers
                             odds = odds.GroupBy(o => o.SpecialBetValue).First().ToList();
                         }
                     }
+                    marketsOdds.Add(bet.Id, odds);
                 }
                 MatchViewModel matchViewModel = new MatchViewModel()
                 {
                     Match = match,
                     PreviewMarkets = previewMarkets,
-                    Odds = odds
+                    MarketsOdds = marketsOdds
                 };
                 matchViewModels.Add(matchViewModel);
             }
@@ -72,14 +76,20 @@ namespace BettingDataProvider.Controllers
                 return NotFound();
             }
 
-            var match = await _context.Matches
+            var match = await _context.Matches.Include(m => m.Bets).ThenInclude(b => b.Odds)
                 .FirstOrDefaultAsync(m => m.Id == id);
             if (match == null)
             {
                 return NotFound();
             }
+            MatchDetailsViewModel matchDetailsViewModel = new MatchDetailsViewModel()
+            {
+                Match = match,
+                ActiveMarkets = match.Bets.Where(b => b.IsActive == true).ToList(),
+                InactiveMarkets = match.Bets.Where(b => b.IsActive == false).ToList()
+            };
 
-            return View(match);
+            return View(matchDetailsViewModel);
         }
     }
 }

@@ -13,27 +13,31 @@
     @foreach (var matchVM in Model)
     {
         <details class="tree-nav__item is-expandable">
-        <summary class="tree-nav__item-title">@matchVM.Match.Name | @matchVM.Match.StartDate</summary>
+            <summary class="tree-nav__item-title">@matchVM.Match.Name | @matchVM.Match.StartDate | <a asp-action="Details" asp-route-id="@matchVM.Match.Id">Details</a></summary>
 
             @foreach (var bet in matchVM.PreviewMarkets)
             {
                 <details class="tree-nav__item is-expandable">
                 <summary class="tree-nav__item-title">@bet.Name</summary>
 
-                    @foreach (var odd in matchVM.Odds)
+                    @foreach (var odds in matchVM.MarketsOdds.Where(m=>m.Key == bet.Id))
                     {
-                        <details class="tree-nav__item is-expandable">
+                        foreach(var odd in odds.Value)
+                        {
+                            <details class="tree-nav__item is-expandable">
 
-                            @if(odd.SpecialBetValue == null)
-                            {
-                                <summary class="tree-nav__item-title">@odd.Name -> @odd.Value</summary>
-                            }
-                            else
-                            {
-                                <summary class="tree-nav__item-title">@odd.Name -> @odd.Value -> @odd.SpecialBetValue</summary>
-                            }
+                                @if (odd.SpecialBetValue == null)
+                                {
+                                    <summary class="tree-nav__item-title">@odd.Name -> @odd.Value</summary>
+                                }
+                                else
+                                {
+                                    <summary class="tree-nav__item-title">@odd.Name -> @odd.Value -> @odd.SpecialBetValue</summary>
+                                }
 
-                        </details>
+                            </details>
+                        }
+                        
                     }
 
                 </details>

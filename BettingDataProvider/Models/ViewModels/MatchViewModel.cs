@@ -6,6 +6,6 @@
 
         public List<Bet> PreviewMarkets { get; set; }
 
-        public List<Odd> Odds { get; set; }
+        public Dictionary<long, List<Odd>> MarketsOdds { get; set; }
     }
 }
